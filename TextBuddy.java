@@ -18,7 +18,7 @@ public class TextBuddy {
 	private static final String MESSAGE_NOTFOUND = "The word is not found in the list!\n";
 	private static final String MESSAGE_SORTED = "The list is sorted in order!!\n";
 	private static final String MESSAGE_WRONGINPUT = "Wrong input of command. Please try agian.\n";
-	private static final String MESSAGE_ERRORDELETE = "Error on delete command! Please enter number";
+	private static final String MESSAGE_ERRORDELETE = "Error on delete command! Please enter number\n";
 	private static final String MESSAGE_CLEAR = "all content deleted from %s\n";
 	private static final String MESSAGE_NOTFOUNDLIST = "Error! Could not found the number on list!\n";
 	private static final String MESSAGE_EMPTY = "%s is empty!\n";
@@ -138,8 +138,7 @@ public class TextBuddy {
 				break;
 
 			default:
-				return MESSAGE_WRONGINPUT;// throw new Error("Unrecognized
-											// command type");
+				return MESSAGE_WRONGINPUT;
 			}
 			return MESSAGE_WRONGINPUT;
 		}

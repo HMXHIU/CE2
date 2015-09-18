@@ -38,8 +38,9 @@ public class TextBuddyTest {
 		assertEquals("add", ("Added to mytextfile.txt : \"appleCare\"\n"), TextBuddy.commandAdd("appleCare"));
 		assertEquals("search", ("1. apple\n2. appleCare\nTotal of 2 results are found!\n"), TextBuddy.commandSearch("pp"));
 		assertEquals("search", ("The word is not found in the list!\n"), TextBuddy.commandSearch("bose"));
+		assertEquals("search", ("Error! No input detected for search.\n"), TextBuddy.commandSearch(""));
 	}
-	
+		
 	@Test
 	public void testSort(){
 		assertEquals("Clear file before test", "all content deleted from mytextfile.txt\n", TextBuddy.commandClear());
