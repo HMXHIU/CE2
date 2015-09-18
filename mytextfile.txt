@@ -1,4 +1,3 @@
-apple
 appleCare
 cherry
 grape

@@ -11,20 +11,21 @@ import java.io.IOException;
 
 public class TextBuddy {
 	
-	private static final String MESSAGE_WELCOME = "Welcome to TextBuddy. %s is ready to be used.";
+	private static final String MESSAGE_WELCOME = "Welcome to TextBuddy. %s is ready to be used.\n";
 	private static final String MESSAGE_COMMAND = "command: ";
-	private static final String MESSAGE_ERRORFILE = "File not specified. Please Try Agian.";
-	private static final String MESSAGE_EMPTYADD = "No input detected! Please try agian.";
-	private static final String MESSAGE_NOTFOUND = "The word is not found in the list!";
-	private static final String MESSAGE_SORTED = "The list is sorted in order!!";
-	private static final String MESSAGE_WRONGINPUT = "Wrong input of command. Please try agian.";
-	private static final String MESSAGE_ERRORDELETE = "Error on delete command!";
-	private static final String MESSAGE_CLEAR = "all content deleted from %s";
-	private static final String MESSAGE_NOTFOUNDLIST = "Error! Could not found the number on list!";
-	private static final String MESSAGE_EMPTY = "%s is empty!";
-	private static final String MESSAGE_DELETED = "deleted from %s: \"%s\"";
-	private static final String MESSAGE_ADDED = "Added to %s : \"%s\"";
-	private static final String MESSAGE_ERRORREADFILE = "Error in reading/ creating of file.";
+	private static final String MESSAGE_ERRORFILE = "File not specified. Please Try Agian.\n";
+	private static final String MESSAGE_EMPTYADD = "No input detected! Please try agian.\n";
+	private static final String MESSAGE_NOTFOUND = "The word is not found in the list!\n";
+	private static final String MESSAGE_SORTED = "The list is sorted in order!!\n";
+	private static final String MESSAGE_WRONGINPUT = "Wrong input of command. Please try agian.\n";
+	private static final String MESSAGE_ERRORDELETE = "Error on delete command! Please enter number";
+	private static final String MESSAGE_CLEAR = "all content deleted from %s\n";
+	private static final String MESSAGE_NOTFOUNDLIST = "Error! Could not found the number on list!\n";
+	private static final String MESSAGE_EMPTY = "%s is empty!\n";
+	private static final String MESSAGE_DELETED = "deleted from %s: \"%s\"\n";
+	private static final String MESSAGE_ADDED = "Added to %s : \"%s\"\n";
+	private static final String MESSAGE_ERRORREADFILE = "Error in reading/ creating of file.\n";
+	private static final String MESSAGE_ERRORSEARCH = "Error! No input detected for search.\n";
 	private static Scanner sc = new Scanner(System.in);
 	private static String fileName;
 	private static ArrayList<String> inputData;
@@ -55,7 +56,10 @@ public class TextBuddy {
 		File file = new File(arg[0]);
 		try {
 			if (!file.exists()) {
-				file.createNewFile();
+				printMessage("File not found!!! Do you want to create the file? Y/N");
+				if(sc.nextLine().toUpperCase().equals("Y")){
+					file.createNewFile();
+				}
 			}
 		} catch (IOException e) {
 			printMessage(MESSAGE_ERRORREADFILE);
@@ -109,34 +113,40 @@ public class TextBuddy {
 		InputCommand command;
 		
 		command = checkCommand(instruction);
+		try{
+			switch (command) {
+			case ADD:
+				return commandAdd(sc.nextLine().trim());
 
-		switch (command) {
-		case ADD:
-			return commandAdd(sc.nextLine().trim());
-			
-		case DISPLAY:
-			return commandDisplay();
-			
-		case DELETE:
-			return commandDelete(sc.nextInt());
-			
-		case CLEAR:
-			return commandClear();
-			
-		case SORT:
-			return commandSort();
-			
-		case SEARCH:
-			return commandSearch(sc.nextLine().trim());
+			case DISPLAY:
+				return commandDisplay();
 
-		case EXIT:
-			commandExit();
-			break;
-			
-		default:
-			return MESSAGE_WRONGINPUT;//throw new Error("Unrecognized command type");
+			case DELETE:
+				return commandDelete(sc.nextInt());
+
+			case CLEAR:
+				return commandClear();
+
+			case SORT:
+				return commandSort();
+
+			case SEARCH:
+				return commandSearch(sc.nextLine().trim());
+
+			case EXIT:
+				commandExit();
+				break;
+
+			default:
+				return MESSAGE_WRONGINPUT;// throw new Error("Unrecognized
+											// command type");
+			}
+			return MESSAGE_WRONGINPUT;
 		}
-		return MESSAGE_WRONGINPUT;
+		catch(Exception e){
+			return MESSAGE_ERRORDELETE;
+		}
+		
 	}
 
 	/**
@@ -173,8 +183,11 @@ public class TextBuddy {
 		int i, size = inputData.size(), numberOfFound = 0;
 		String result="";
 		
+		if(information.isEmpty())
+			return MESSAGE_ERRORSEARCH;
+		
 		CharSequence cs = information;
-
+		
 		for (i = 0; i < size; i++) {
 			if (inputData.get(i).contains(cs)) {
 				numberOfFound++;
@@ -199,7 +212,7 @@ public class TextBuddy {
 	 * This method is to add variable into the array list.
 	 */
 	public static String commandAdd(String information) {
-		if(information.equals(null)||information.equals(""))
+		if(information.isEmpty())
 			return MESSAGE_EMPTYADD;
 		inputData.add(information);
 		save();
@@ -227,17 +240,14 @@ public class TextBuddy {
 	 */
 	public static String commandDelete(int information) {
 		int number;
-		try {
-			number = information- 1;
-			if (number + 1 > inputData.size() || number < 0) {
-				return MESSAGE_NOTFOUNDLIST;
-			} else {
-				line = inputData.get(number);
-				inputData.remove(number);
-				save();
-			}
-		} catch (Exception e) {
-			return MESSAGE_ERRORDELETE;
+
+		number = information - 1;
+		if (number + 1 > inputData.size() || number < 0) {
+			return MESSAGE_NOTFOUNDLIST;
+		} else {
+			line = inputData.get(number);
+			inputData.remove(number);
+			save();
 		}
 		return (String.format(MESSAGE_DELETED, fileName, line));
 	}
@@ -257,7 +267,7 @@ public class TextBuddy {
 	}
 	
 	public static void printMessage(String msg){
-		System.out.println(msg);
+		System.out.print(msg);
 	}
 	
 	/**
