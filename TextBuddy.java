@@ -1,23 +1,40 @@
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
 
 public class TextBuddy {
-
+	
+	private static final String MESSAGE_WELCOME = "Welcome to TextBuddy. %s is ready to be used.";
+	private static final String MESSAGE_COMMAND = "command: ";
+	private static final String MESSAGE_ERRORFILE = "File not specified. Please Try Agian.";
+	private static final String MESSAGE_EMPTYADD = "No input detected! Please try agian.";
+	private static final String MESSAGE_NOTFOUND = "The word is not found in the list!";
+	private static final String MESSAGE_SORTED = "The list is sorted in order!!";
+	private static final String MESSAGE_WRONGINPUT = "Wrong input of command. Please try agian.";
+	private static final String MESSAGE_ERRORDELETE = "Error on delete command!";
+	private static final String MESSAGE_CLEAR = "all content deleted from %s";
+	private static final String MESSAGE_NOTFOUNDLIST = "Error! Could not found the number on list!";
+	private static final String MESSAGE_EMPTY = "%s is empty!";
+	private static final String MESSAGE_DELETED = "deleted from %s: \"%s\"";
+	private static final String MESSAGE_ADDED = "Added to %s : \"%s\"";
+	private static final String MESSAGE_ERRORREADFILE = "Error in reading/ creating of file.";
 	private static Scanner sc = new Scanner(System.in);
 	private static String fileName;
 	private static ArrayList<String> inputData;
 	private static String line;
-	
+
 	// The possible input command to be enter by user.
 	enum InputCommand {
-		ADD, DISPLAY, DELETE, CLEAR, EXIT, INVALID
+		ADD, DISPLAY, DELETE, CLEAR, EXIT, INVALID, SORT, SEARCH
 	}
-
+	
 	public static void main(String[] args) {
 		checkForFile(args);
 		processFile(args[0]);
@@ -32,11 +49,19 @@ public class TextBuddy {
 	 */
 	public static void checkForFile(String[] arg) {
 		if (arg.length == 0) {
-			System.out.println("File not located. Please Try Agian.");
+			printMessage(MESSAGE_ERRORFILE);
 			System.exit(0);
 		}
+		File file = new File(arg[0]);
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+		} catch (IOException e) {
+			printMessage(MESSAGE_ERRORREADFILE);
+		}
 	}
-	
+
 	/**
 	 * This method is used for read data from the specified file.
 	 * 
@@ -64,42 +89,56 @@ public class TextBuddy {
 			System.exit(0);
 		}
 	}
-	
+
 	/**
 	 * This method is used for process all the command entered by the user.
 	 */
 	public static void processCommand() {
-		InputCommand command;
-
-		System.out.println("Welcome to TextBuddy. " + fileName + " is ready for use!");
+		
+		printMessage(String.format(MESSAGE_WELCOME, fileName));
 		while (true) {
-			System.out.print("command: ");
-			command = checkCommand(sc.next().toUpperCase());
-			switch (command) {
-			case ADD:
-				commandAdd();
-				break;
-			case DISPLAY:
-				commandDisplay();
-				break;
-			case DELETE:
-				commandDelete();
-				break;
-			case CLEAR:
-				commandClear();
-				break;
-			case INVALID:
-				wrongCommand();
-				break;
-			case EXIT:
-				commandExit();
-				break;
-			default:
-				throw new Error("Unrecognized command type");
-			}
+			printMessage(MESSAGE_COMMAND);
+			printMessage(executeCommand(sc.next().toUpperCase()));
 		}
 	}
 	
+	/**
+	 * This method is used for execute all the command.
+	 */
+	public static String executeCommand(String instruction) {
+		InputCommand command;
+		
+		command = checkCommand(instruction);
+
+		switch (command) {
+		case ADD:
+			return commandAdd(sc.nextLine().trim());
+			
+		case DISPLAY:
+			return commandDisplay();
+			
+		case DELETE:
+			return commandDelete(sc.nextInt());
+			
+		case CLEAR:
+			return commandClear();
+			
+		case SORT:
+			return commandSort();
+			
+		case SEARCH:
+			return commandSearch(sc.nextLine().trim());
+
+		case EXIT:
+			commandExit();
+			break;
+			
+		default:
+			return MESSAGE_WRONGINPUT;//throw new Error("Unrecognized command type");
+		}
+		return MESSAGE_WRONGINPUT;
+	}
+
 	/**
 	 * This operation classified command into different type
 	 * 
@@ -120,78 +159,107 @@ public class TextBuddy {
 			return InputCommand.CLEAR;
 		} else if (input.equalsIgnoreCase("EXIT")) {
 			return InputCommand.EXIT;
+		} else if (input.equalsIgnoreCase("SORT")) {
+			return InputCommand.SORT;
+		} else if (input.equalsIgnoreCase("SEARCH")) {
+			return InputCommand.SEARCH;
 		} else {
 			return InputCommand.INVALID;
 		}
 	}
 
-	public static void wrongCommand() {
-		System.out.println("Wrong input of command. Please try agian.");
+	public static String commandSearch(String information) {
+
+		int i, size = inputData.size(), numberOfFound = 0;
+		String result="";
+		
+		CharSequence cs = information;
+
+		for (i = 0; i < size; i++) {
+			if (inputData.get(i).contains(cs)) {
+				numberOfFound++;
+				result= result.concat(numberOfFound + ". " + inputData.get(i)+ "\n");
+			}
+		}
+		if (numberOfFound == 0) {
+			return MESSAGE_NOTFOUND;
+		}
+		result= result.concat("Total of " + numberOfFound + " results are found!\n");
+		return result;
+	}
+
+	public static String commandSort() {
+		Collections.sort(inputData);
+		save();
+		return MESSAGE_SORTED;
+		
 	}
 
 	/**
 	 * This method is to add variable into the array list.
 	 */
-	public static void commandAdd() {
-
-		line = sc.nextLine().trim();
-		inputData.add(line);
-		System.out.println("added to " + fileName + " : \"" + line + "\"");
+	public static String commandAdd(String information) {
+		if(information.equals(null)||information.equals(""))
+			return MESSAGE_EMPTYADD;
+		inputData.add(information);
 		save();
+		return (String.format(MESSAGE_ADDED, fileName, information));
 	}
 
 	/**
 	 * This method is to display all the variable into the array list.
 	 */
-	public static void commandDisplay() {
+	public static String commandDisplay() {
 		int i = 0;
+		String result="";
 		if (inputData.size() > 0) {
 			while (i != inputData.size()) {
 				i++;
-				System.out.println(i + ". " + inputData.get(i - 1).toString());
+				 result= result.concat(i + ". " + inputData.get(i - 1).toString() + "\n");
 			}
-		} else
-			System.out.println(fileName + " is empty");
+			return result;
+		} 
+		return (String.format(MESSAGE_EMPTY, fileName));
 	}
 
 	/**
 	 * This method is to remove variable from the array list.
 	 */
-	public static void commandDelete() {
+	public static String commandDelete(int information) {
 		int number;
-		try{
-			number = sc.nextInt() - 1;
-			if (number + 1 > inputData.size()||number<0) {
-				System.out.println("Error! Could not found the number on list!");
+		try {
+			number = information- 1;
+			if (number + 1 > inputData.size() || number < 0) {
+				return MESSAGE_NOTFOUNDLIST;
 			} else {
 				line = inputData.get(number);
 				inputData.remove(number);
-				System.out.println("deleted from " + fileName + ": \"" + line + "\"");
 				save();
 			}
+		} catch (Exception e) {
+			return MESSAGE_ERRORDELETE;
 		}
-		catch (Exception e) {
-            System.out.println("Error on delete command!");
-            sc.nextLine();
-        }
+		return (String.format(MESSAGE_DELETED, fileName, line));
 	}
-	
+
 	/**
 	 * This method is to clear the entire array list.
 	 */
-	public static void commandClear() {
+	public static String commandClear() {
 		inputData.clear();
-		System.out.println("all content deleted from " + fileName);
 		save();
+		return (String.format(MESSAGE_CLEAR,fileName));
+		
 	}
 
-	/**
-	 * Exit the program.
-	 */
 	public static void commandExit() {
 		System.exit(0);
 	}
-
+	
+	public static void printMessage(String msg){
+		System.out.println(msg);
+	}
+	
 	/**
 	 * This method is to print the arraylist into the specified file.
 	 */
@@ -202,7 +270,7 @@ public class TextBuddy {
 			FileWriter fileWrite = new FileWriter(fileName);
 			BufferedWriter bufferWrite = new BufferedWriter(fileWrite);
 			PrintWriter fileOut = new PrintWriter(bufferWrite);
-			
+
 			// Write the arraylist line by line into the file specified
 			while (i < inputData.size()) {
 				fileOut.println(inputData.get(i).toString());
@@ -214,3 +282,4 @@ public class TextBuddy {
 		}
 	}
 }
+
