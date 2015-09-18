@@ -1,0 +1,16 @@
+Welcome to TextBuddy. mytextfile.txt is ready for use!
+command: all content deleted from mytextfile.txt
+command: added to mytextfile.txt : "apple"
+command: added to mytextfile.txt : "orange"
+command: deleted from mytextfile.txt: "orange"
+command: 1. apple
+command: added to mytextfile.txt : "pineapple"
+command: added to mytextfile.txt : "papaya"
+command: added to mytextfile.txt : "mango"
+command: added to mytextfile.txt : "pear"
+command: deleted from mytextfile.txt: "mango"
+command: deleted from mytextfile.txt: "apple"
+command: 1. pineapple
+2. papaya
+3. pear
+command: 
