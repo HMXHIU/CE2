@@ -26,6 +26,7 @@ public class TextBuddy {
 	private static final String MESSAGE_ADDED = "Added to %s : \"%s\"\n";
 	private static final String MESSAGE_ERRORREADFILE = "Error in reading/ creating of file.\n";
 	private static final String MESSAGE_ERRORSEARCH = "Error! No input detected for search.\n";
+	private static final String MESSAGE_NEWFILE = "File not found!!! Do you want to create the file? Y/N\n";
 	private static Scanner sc = new Scanner(System.in);
 	private static String fileName;
 	private static ArrayList<String> inputData;
@@ -56,7 +57,7 @@ public class TextBuddy {
 		File file = new File(arg[0]);
 		try {
 			if (!file.exists()) {
-				printMessage("File not found!!! Do you want to create the file? Y/N");
+				printMessage(MESSAGE_NEWFILE);
 				if(sc.nextLine().toUpperCase().equals("Y")){
 					file.createNewFile();
 				}
@@ -138,12 +139,15 @@ public class TextBuddy {
 				break;
 
 			default:
+				sc.nextLine(); //Clear all the command that capture by scanner
 				return MESSAGE_WRONGINPUT;
 			}
 			return MESSAGE_WRONGINPUT;
 		}
 		catch(Exception e){
+			sc.nextLine(); //Clear all the command that capture by scanner
 			return MESSAGE_ERRORDELETE;
+			
 		}
 		
 	}
